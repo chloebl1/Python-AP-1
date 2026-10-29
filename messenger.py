@@ -1,6 +1,7 @@
 # Créé par compteadmin, le 27/10/2026 en Python 3.7
 from datetime import datetime
 import json
+from colorama import Fore
 
 server_data = {
     'users': [
@@ -70,10 +71,13 @@ def fonction () :
                     for user in server_data['users'] :
                         if messages["sender_id"] == user['id'] :
                             L.append ((messages["reception_date"], user["name"], messages["content"]))
-            def obtenir_date(x):
-                return x[0]
-            L.sort(key=obtenir_date)
-            print ("Les messages de ce groupe sont : \n", L)
+            #def obtenir_date(x):
+                #return x[0]
+            L_triee= sorted (L, key=lambda x: x[2])
+            print ("Les messages de ce groupe sont : \n")
+            for i in range (len(L_triee)) :
+                print(Fore.LIGHTBLACK_EX + str(L[i][0]) + " : " + Fore.BLUE + str(L[i][1]) + Fore.RESET + "-->" + str(L[i][2]))
+
             if not bool:
                 print("L'id entré n'est pas relié à un groupe ou le groupe ne comporte pas de messages")
 
