@@ -22,9 +22,10 @@ server_data = {
     ]
 }
 
-#def load_server_data_from_file () :
+def load_server_data_from_file () :
+    return (json.load(open("storage.json")))
 
-
+server_data = load_server_data_from_file ()
 
 def fonction () :
     print('=== Messenger ===')
@@ -100,11 +101,12 @@ def fonction () :
                     bool = False
 
         server_data ["users"].append ({'id': identifiant, 'name': nom})
+        serialisation(server_data)
 
-        print ("\n Retour ?")               #Menu principal
-        choix = input("oui | non \n")
-        if choix == "oui" :
+        choix = input("\nr : Retour ?\n")       #Menu principal
+        if choix == "r" :
             fonction()
+        
 
     # Ajouter un groupe
     elif choice == "+c" :
@@ -125,20 +127,30 @@ def fonction () :
         print ('\nLes utilisateurs sont :\n', L)
         member = input ("Quel est l'id des personnes que vous souhaitez ajouter dans le groupe?")
         server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
-       
-        print ("\n Retour ?")               #Menu principal
-        choix = input("oui | non \n")
-        if choix == "oui" :
-            fonction() 
+        while member != 'non' : 
+            member = input ("Souhaitez vous ajouter quelqu'un d'autre ?\nSi oui, tapez son id\nSi non, tapez non\n")
+            server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
+        serialisation(server_data)
+        
+        choix = input("\nr : Retour ?\n")       #Menu principal
+        if choix == "r" :
+            fonction()
+
     
     else:
         print('Unknown option:', choice)
 
-        print ("\n Retour ?")
-        choix = input("oui | non \n")
-        if choix == "oui" :
+        choix = input("\nr : Retour ?\n")       #Menu principal
+        if choix == "r" :
             fonction()
 
+
     return()
+
+
+def serialisation(server_data):
+    with open("storage.json", "w", encoding="utf-8") as f:
+        json.dump(server_data, f, ensure_ascii=False, indent=4)
+
 
 fonction()
