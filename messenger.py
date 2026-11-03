@@ -22,10 +22,144 @@ server_data = {
     ]
 }
 
+
+
+
+
 def load_server_data_from_file () :
     return (json.load(open("storage.json")))
 
 server_data = load_server_data_from_file ()
+
+
+#ajouter des utilisateurs
+def see_user () :
+    L=""
+    for user in server_data ['users'] :
+        L+=str(user['id'])+ ". " + user['name']+ "\n"
+    print ('\nLes utilisateurs sont :\n',L)
+    return()
+
+
+
+#retour au menu principal
+def retour () : 
+    choix = input("\nr : Retour ?\n")      
+    if choix == "r" :
+        fonction()
+    return()
+
+
+#voir les groupes
+def see_channels() :
+    L=""
+    for channel in server_data ['channels'] :
+        L+=str(channel['id'])+ ". " + channel['name']+ "\n"
+    print('\nLes groupes sont :\n', L)    
+    return()       
+
+
+#voir les messages
+def see_messages(groupe) :
+    L=[]
+    bool = False
+    for messages in server_data['messages'] :
+        if str(messages['channel']) == groupe :
+            bool = True
+            for user in server_data['users'] :
+                if messages["sender_id"] == user['id'] :
+                    L.append ((messages["reception_date"], user["name"], messages["content"]))
+    #def obtenir_date(x):
+        #return x[0]
+    L_triee= sorted (L, key=lambda x: x[2])
+    print ("Les messages de ce groupe sont : \n")
+    for i in range (len(L_triee)) :
+        print(Fore.LIGHTBLACK_EX + str(L[i][0]) + " : " + Fore.BLUE + str(L[i][1]) + Fore.RESET + "-->" + str(L[i][2]))
+
+    if not bool:
+        print("L'id entré n'est pas relié à un groupe ou le groupe ne comporte pas de messages")
+    return ()
+
+
+#ajouter un utilisateur
+def add_user() :
+    nom = input ("Quel est le nom de l'utilisateur que vous souhaitez ajouter ?")
+    bool = False            # on lui attribue un id valable (pas déjà utilisé)
+    identifiant = 0
+    while not bool :
+        identifiant+=1
+        bool = True
+        for user in server_data['users'] :
+            if user['id'] == identifiant :
+                bool = False
+
+    server_data ["users"].append ({'id': identifiant, 'name': nom})
+    serialisation(server_data)
+    return()
+
+
+#ajouter un groupe
+def add_channel() :
+    nom = input ("Quel est le nom du groupe que vous souhaitez ajouter ?")
+        
+    bool = False            # on lui attribue un id valable (pas déjà utilisé)
+    identifiant = 0
+    while not bool :
+        identifiant+=1
+        bool = True
+        for channel in server_data['channels'] :
+            if channel['id'] == identifiant :
+                bool = False
+
+    L=""
+    for user in server_data ['users'] :
+        L+=str(user['id']) + ". " + user['name']+ "\n"
+    print ('\nLes utilisateurs sont :\n', L)
+    member = input ("Quel est l'id des personnes que vous souhaitez ajouter dans le groupe?")
+    server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
+    while member != 'non' : 
+        member = input ("Souhaitez vous ajouter quelqu'un d'autre ?\nSi oui, tapez son id\nSi non, tapez non\n")
+        server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
+    serialisation(server_data)
+    return()
+
+#ajouter des messages dans un groupe
+def add_messages(id_groupe) :
+    print ("Les utilisateurs de ce groupe sont :\n", see_users_groupe (id_groupe))
+    id_sender = input ("Quel est votre id ? ")
+    content = input ("Ecrivez votre message : ")
+    reception_date = datetime.now()[:19]
+
+    bool = False            # on attribue au message un id valable (pas déjà utilisé)
+    identifiant = 0
+    while not bool :
+        identifiant+=1
+        bool = True
+        for channel in server_data['messages'] :
+                if channel['id'] == identifiant :
+                    bool = False
+
+    server_data ["messages"].append ({'id': identifiant, 'reception_date': str(reception_date), 'sender_id' : int(id_sender), 'channel' : int(id_groupe), 'content' : content })
+    serialisation(server_data)
+    return()
+
+
+#afficher les utilisateurs d'un groupe
+def see_users_groupe (id_groupe) :
+    L=""
+    for channel in server_data['channels'] :
+        if str(channel['id']) == id_groupe :
+            L_users = channel['member_ids'] 
+    for id_membres in L_users :
+        for id_membres2 in server_data['users'] :
+            if id_membres == id_membres2['id'] :
+                L+=str(id_membres)+". "+str(id_membres2['name'])+"\n"
+    return (L)
+        
+
+
+
+##################################--FONCTION--########################################################################""
 
 def fonction () :
     print('=== Messenger ===')
@@ -36,113 +170,50 @@ def fonction () :
         print('Bye!')
 
     #Afficher les utilisateurs
-    elif choice == 'u' :                             
-        L=""
-        for user in server_data ['users'] :
-            L+=str(user['id'])+ ". " + user['name']+ "\n"
-        print ('\nLes utilisateurs sont :\n',L)
-        
-                   
-        choix = input("\nr : Retour ?\n")       #Menu principal
-        if choix == "r" :
-            fonction()
-
+    elif choice == 'u' :  
+        see_user()
+        retour()
+              
     #Afficher les groupes        
     elif choice == 'c':
-        L=""
-        for channel in server_data ['channels'] :
-            L+=str(channel['id'])+ ". " + channel['name']+ "\n"
-            print ('\nLes groupes sont :\n', L)           
+        see_channels()        
 
         # Afficher les messages d'un groupe
-        print("\nmg : Voir les messages d'un groupe\nr : retour")
-        choix2 = input ("")
+        choix2 = input("\nmg : Voir les messages d'un groupe\nr : retour\n")
 
         if choix2 == "r" :     #Menu principal
             fonction()
 
         #Voir les messages d'un groupe
         elif choix2 == 'mg' :
-            groupe = input ("\nEntrez l'id du groupe dont vous souhaitez voir les messages :" )
-            L=[]
-            bool = False
-            for messages in server_data['messages'] :
-                if str(messages['channel']) == groupe :
-                    bool = True
-                    for user in server_data['users'] :
-                        if messages["sender_id"] == user['id'] :
-                            L.append ((messages["reception_date"], user["name"], messages["content"]))
-            #def obtenir_date(x):
-                #return x[0]
-            L_triee= sorted (L, key=lambda x: x[2])
-            print ("Les messages de ce groupe sont : \n")
-            for i in range (len(L_triee)) :
-                print(Fore.LIGHTBLACK_EX + str(L[i][0]) + " : " + Fore.BLUE + str(L[i][1]) + Fore.RESET + "-->" + str(L[i][2]))
-
-            if not bool:
-                print("L'id entré n'est pas relié à un groupe ou le groupe ne comporte pas de messages")
-
-            print ("\n Retour ?")                   #Menu principal
-            choix = input("oui | non \n")
-            if choix == "oui" :
+            id_groupe = input ("\nEntrez l'id du groupe dont vous souhaitez voir les messages : " )
+            see_messages(id_groupe)
+            choix3 = input("\n+m : ajouter un message dans ce groupe\nr : retour\n")
+            if choix3 == "r" :
                 fonction()
+
+            elif choix3 == "+m" :
+                add_messages (id_groupe)
+                retour()
+
+ 
 
     #Ajouter un utilisateur            
     elif choice == "+u" :
-        nom = input ("Quel est le nom de l'utilisateur que vous souhaitez ajouter ?")
-        
-        bool = False            # on lui attribue un id valable (pas déjà utilisé)
-        identifiant = 0
-        while not bool :
-            identifiant+=1
-            bool = True
-            for user in server_data['users'] :
-                if user['id'] == identifiant :
-                    bool = False
-
-        server_data ["users"].append ({'id': identifiant, 'name': nom})
-        serialisation(server_data)
-
-        choix = input("\nr : Retour ?\n")       #Menu principal
-        if choix == "r" :
-            fonction()
+        add_user()
+        retour()
         
 
     # Ajouter un groupe
     elif choice == "+c" :
-        nom = input ("Quel est le nom du groupe que vous souhaitez ajouter ?")
-        
-        bool = False            # on lui attribue un id valable (pas déjà utilisé)
-        identifiant = 0
-        while not bool :
-            identifiant+=1
-            bool = True
-            for channel in server_data['channels'] :
-                if channel['id'] == identifiant :
-                    bool = False
+        add_channel()
+        retour()
 
-        L=""
-        for user in server_data ['users'] :
-            L+=str(user['id']) + ". " + user['name']+ "\n"
-        print ('\nLes utilisateurs sont :\n', L)
-        member = input ("Quel est l'id des personnes que vous souhaitez ajouter dans le groupe?")
-        server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
-        while member != 'non' : 
-            member = input ("Souhaitez vous ajouter quelqu'un d'autre ?\nSi oui, tapez son id\nSi non, tapez non\n")
-            server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
-        serialisation(server_data)
-        
-        choix = input("\nr : Retour ?\n")       #Menu principal
-        if choix == "r" :
-            fonction()
 
-    
     else:
         print('Unknown option:', choice)
 
-        choix = input("\nr : Retour ?\n")       #Menu principal
-        if choix == "r" :
-            fonction()
+        retour()
 
 
     return()
