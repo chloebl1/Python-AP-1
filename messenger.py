@@ -22,12 +22,45 @@ server_data = {
     ]
 }
 
+class User :
+    def __init__(self, id: int, name: str):
+        self.id=id
+        self.name= name
 
 
+class Channel :
+    def __init__(self, id: int, name: str, member_ids:list):
+        self.id=id
+        self.name= name
+        self.member_ids = member_ids
+
+
+class Message :
+    def __init__(self, id: int, reception_date: str, sender_id: int, channel: int, content: str):
+        self.id=id
+        self.reception_date=reception_date
+        self.sender_id=sender_id
+        self.channel=channel
+        self.content = content
 
 
 def load_server_data_from_file () :
-    return (json.load(open("storage.json")))
+    data = json.load(open("storage.json"))
+    L_user=[]
+    for user in data['users'] :
+        L_user.append(User(user['id'], user['name']))
+    data['users']=L_user
+
+    L_channel=[]
+    for channel in data['channels'] :
+        L_channel.append(Channel(channel['id'], channel['name'], channel['member_ids']))
+    data['channels']=L_channel
+
+    L_message=[]
+    for message in data['messages'] :
+        L_message.append(Message(message['id'], message['reception_date'], message['sender_id'], message['channel'], message['content']))
+    data['messages']=message
+    return (data)
 
 server_data = load_server_data_from_file ()
 
@@ -36,6 +69,7 @@ server_data = load_server_data_from_file ()
 def see_user () :
     L=""
     for user in server_data ['users'] :
+        print(type(user))
         L+=str(user['id'])+ ". " + user['name']+ "\n"
     print ('\nLes utilisateurs sont :\n',L)
     return()
