@@ -69,8 +69,7 @@ server_data = load_server_data_from_file ()
 def see_user () :
     L=""
     for user in server_data ['users'] :
-        print(type(user))
-        L+=str(user['id'])+ ". " + user['name']+ "\n"
+        L+=str(user.id)+ ". " + user.name+ "\n"
     print ('\nLes utilisateurs sont :\n',L)
     return()
 
@@ -88,7 +87,7 @@ def retour () :
 def see_channels() :
     L=""
     for channel in server_data ['channels'] :
-        L+=str(channel['id'])+ ". " + channel['name']+ "\n"
+        L+=str(channel.id)+ ". " + channel.name+ "\n"
     print('\nLes groupes sont :\n', L)    
     return()       
 
@@ -98,11 +97,11 @@ def see_messages(groupe) :
     L=[]
     bool = False
     for messages in server_data['messages'] :
-        if str(messages['channel']) == groupe :
+        if str(messages.channel) == groupe :
             bool = True
             for user in server_data['users'] :
-                if messages["sender_id"] == user['id'] :
-                    L.append ((messages["reception_date"], user["name"], messages["content"]))
+                if messages.sender_id == user.id :
+                    L.append ((messages.reception_date, user.name, messages.content))
     #def obtenir_date(x):
         #return x[0]
     L_triee= sorted (L, key=lambda x: x[2])
@@ -124,7 +123,7 @@ def add_user() :
         identifiant+=1
         bool = True
         for user in server_data['users'] :
-            if user['id'] == identifiant :
+            if user.id == identifiant :
                 bool = False
 
     server_data ["users"].append ({'id': identifiant, 'name': nom})
@@ -142,12 +141,12 @@ def add_channel() :
         identifiant+=1
         bool = True
         for channel in server_data['channels'] :
-            if channel['id'] == identifiant :
+            if channel.id == identifiant :
                 bool = False
 
     L=""
     for user in server_data ['users'] :
-        L+=str(user['id']) + ". " + user['name']+ "\n"
+        L+=str(user.id) + ". " + user.name+ "\n"
     print ('\nLes utilisateurs sont :\n', L)
     member = input ("Quel est l'id des personnes que vous souhaitez ajouter dans le groupe?")
     server_data ["channels"].append ({'id': identifiant, 'name': nom, 'member_ids' : member})
@@ -170,7 +169,7 @@ def add_messages(id_groupe) :
         identifiant+=1
         bool = True
         for channel in server_data['messages'] :
-                if channel['id'] == identifiant :
+                if channel.id == identifiant :
                     bool = False
 
     server_data ["messages"].append ({'id': identifiant, 'reception_date': str(reception_date), 'sender_id' : int(id_sender), 'channel' : int(id_groupe), 'content' : content })
@@ -182,12 +181,12 @@ def add_messages(id_groupe) :
 def see_users_groupe (id_groupe) :
     L=""
     for channel in server_data['channels'] :
-        if str(channel['id']) == id_groupe :
-            L_users = channel['member_ids'] 
+        if str(channel.id) == id_groupe :
+            L_users = channel.member_ids 
     for id_membres in L_users :
         for id_membres2 in server_data['users'] :
-            if id_membres == id_membres2['id'] :
-                L+=str(id_membres)+". "+str(id_membres2['name'])+"\n"
+            if id_membres == id_membres2.id :
+                L+=str(id_membres)+". "+str(id_membres2.name)+"\n"
     return (L)
         
 
